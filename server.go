@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"sync"
 	"syscall"
@@ -34,6 +35,7 @@ type Server struct {
 	openFilesLock sync.RWMutex
 	handleCount   int
 	workDir       string
+	allowGet      bool
 }
 
 func (svr *Server) nextHandle(f *os.File) string {
@@ -139,6 +141,14 @@ func WithServerWorkingDirectory(workDir string) ServerOption {
 	}
 }
 
+// WithAllowGet sets a flag to allow get
+func WithAllowGet(allowGet bool) ServerOption {
+	return func(s *Server) error {
+		s.allowGet = allowGet
+		return nil
+	}
+}
+
 type rxPacket struct {
 	pktType  fxp
 	pktBytes []byte
@@ -149,6 +159,7 @@ func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 	for pkt := range pktChan {
 		// readonly checks
 		readonly := true
+
 		switch pkt := pkt.requestPacket.(type) {
 		case notReadOnly:
 			readonly = false
@@ -158,6 +169,9 @@ func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 			readonly = pkt.readonly()
 		}
 
+		pktType := reflect.TypeOf(pkt.requestPacket)
+		fmt.Printf("pktType: (%v)\n", pktType)
+
 		// If server is operating read-only and a write operation is requested,
 		// return permission denied
 		if !readonly && svr.readOnly {
@@ -166,6 +180,10 @@ func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 			)
 			continue
 		}
+
+		// if !svr.allowGet && pktType == {
+
+		// }
 
 		if err := handlePacket(svr, pkt); err != nil {
 			return err
