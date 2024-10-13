@@ -169,9 +169,6 @@ func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 			readonly = pkt.readonly()
 		}
 
-		pktType := reflect.TypeOf(pkt.requestPacket)
-		fmt.Printf("pktType: (%v)\n", pktType)
-
 		// If server is operating read-only and a write operation is requested,
 		// return permission denied
 		if !readonly && svr.readOnly {
@@ -181,9 +178,13 @@ func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 			continue
 		}
 
-		// if !svr.allowGet && pktType == {
-
-		// }
+		pktType := fmt.Sprint(reflect.TypeOf(pkt.requestPacket))
+		if !svr.allowGet && pktType == "*sftpsshFxpReadPacket" {
+			svr.pktMgr.readyPacket(
+				svr.pktMgr.newOrderedResponse(statusFromError(pkt.id(), syscall.EPERM), pkt.orderID()),
+			)
+			continue
+		}
 
 		if err := handlePacket(svr, pkt); err != nil {
 			return err
