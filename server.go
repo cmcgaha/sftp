@@ -158,6 +158,9 @@ type rxPacket struct {
 // Up to N parallel servers
 func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 	for pkt := range pktChan {
+		pktType := fmt.Sprint(reflect.TypeOf(pkt.requestPacket))
+		fmt.Printf("pkt.requestPacket.(type)(%s)\n", pktType)
+
 		// readonly checks
 		readonly := true
 
@@ -179,7 +182,6 @@ func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 			continue
 		}
 
-		pktType := fmt.Sprint(reflect.TypeOf(pkt.requestPacket))
 		if !svr.allowGet && pktType == "*sftp.sshFxpReadPacket" {
 			svr.pktMgr.readyPacket(
 				svr.pktMgr.newOrderedResponse(statusFromError(pkt.id(), syscall.EPERM), pkt.orderID()),
