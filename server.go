@@ -88,6 +88,7 @@ func NewServer(rwc io.ReadWriteCloser, options ...ServerOption) (*Server, error)
 		debugStream: ioutil.Discard,
 		pktMgr:      newPktMgr(svrConn),
 		openFiles:   make(map[string]*os.File),
+		allowGet:    true,
 	}
 
 	for _, o := range options {
@@ -179,7 +180,9 @@ func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 		}
 
 		pktType := fmt.Sprint(reflect.TypeOf(pkt.requestPacket))
+		fmt.Printf("allowGet(%v)  pktType(%s)\n", svr.allowGet, pktType)
 		if !svr.allowGet && pktType == "*sftpsshFxpReadPacket" {
+			fmt.Println("prevent get")
 			svr.pktMgr.readyPacket(
 				svr.pktMgr.newOrderedResponse(statusFromError(pkt.id(), syscall.EPERM), pkt.orderID()),
 			)
