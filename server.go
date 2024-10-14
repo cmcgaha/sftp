@@ -180,9 +180,7 @@ func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 		}
 
 		pktType := fmt.Sprint(reflect.TypeOf(pkt.requestPacket))
-		fmt.Printf("allowGet(%v)  pktType(%s)\n", svr.allowGet, pktType)
 		if !svr.allowGet && pktType == "*sftp.sshFxpReadPacket" {
-			fmt.Println("prevent get")
 			svr.pktMgr.readyPacket(
 				svr.pktMgr.newOrderedResponse(statusFromError(pkt.id(), syscall.EPERM), pkt.orderID()),
 			)
@@ -199,6 +197,8 @@ func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 func handlePacket(s *Server, p orderedRequest) error {
 	var rpkt responsePacket
 	orderID := p.orderID()
+	pktType := fmt.Sprint(reflect.TypeOf(p.requestPacket))
+	fmt.Printf("p.requestPacket.(type)(%s)\n", pktType)
 	switch p := p.requestPacket.(type) {
 	case *sshFxInitPacket:
 		rpkt = &sshFxVersionPacket{
