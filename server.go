@@ -181,7 +181,7 @@ func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 
 		pktType := fmt.Sprint(reflect.TypeOf(pkt.requestPacket))
 		fmt.Printf("allowGet(%v)  pktType(%s)\n", svr.allowGet, pktType)
-		if !svr.allowGet && pktType == "*sftp.sshFxpClosePacket" {
+		if !svr.allowGet && pktType == "*sftp.sshFxpReadPacket" {
 			fmt.Println("prevent get")
 			svr.pktMgr.readyPacket(
 				svr.pktMgr.newOrderedResponse(statusFromError(pkt.id(), syscall.EPERM), pkt.orderID()),
