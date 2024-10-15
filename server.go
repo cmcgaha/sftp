@@ -159,7 +159,7 @@ type rxPacket struct {
 func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 	for pkt := range pktChan {
 		pktType := fmt.Sprint(reflect.TypeOf(pkt.requestPacket))
-		fmt.Printf("pkt.requestPacket.(type)(%s)\n", pktType)
+		//fmt.Printf("pkt.requestPacket.(type)(%s)\n", pktType)
 
 		// readonly checks
 		readonly := true
@@ -199,8 +199,8 @@ func (svr *Server) sftpServerWorker(pktChan chan orderedRequest) error {
 func handlePacket(s *Server, p orderedRequest) error {
 	var rpkt responsePacket
 	orderID := p.orderID()
-	pktType := fmt.Sprint(reflect.TypeOf(p.requestPacket))
-	fmt.Printf("p.requestPacket.(type)(%s)\n", pktType)
+	// pktType := fmt.Sprint(reflect.TypeOf(p.requestPacket))
+	// fmt.Printf("p.requestPacket.(type)(%s)\n", pktType)
 	switch p := p.requestPacket.(type) {
 	case *sshFxInitPacket:
 		rpkt = &sshFxVersionPacket{
